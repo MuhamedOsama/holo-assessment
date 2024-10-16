@@ -6,6 +6,8 @@ import {
   IsString,
   IsUUID,
 } from 'class-validator';
+import { IsFutureDate } from '../../validators/IsFutureDate.validator';
+import { Type } from 'class-transformer';
 
 export class GenerateVoucherDto {
   @ApiProperty()
@@ -21,5 +23,6 @@ export class GenerateVoucherDto {
   offerId: string;
   @ApiProperty()
   @IsISO8601()
+  @IsFutureDate({ message: 'Expiration date must be a future date' })
   expirationDate: Date;
 }

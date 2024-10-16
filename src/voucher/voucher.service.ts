@@ -21,37 +21,48 @@ export class VoucherService {
     offerId: string,
     expirationDate: Date,
   ) {
-    // Check if customer and offer exist
-    await this.customerService.checkCustomerExists(customerId);
-    await this.specialOfferService.checkOfferExists(offerId);
-    // generate the code
-    const code = this.generateVoucherCode();
-    return this.prismaService.voucherCode.create({
-      data: {
-        code,
-        customerId,
-        specialOfferId: offerId,
-        expirationDate,
-      },
+    // To ensure that customer and offer validation, as well as voucher creation, are atomic
+    return await this.prismaService.$transaction(async (prisma) => {
+      // Check if customer and offer exist
+      await this.customerService.checkCustomerExists(customerId);
+      await this.specialOfferService.checkOfferExists(offerId);
+
+      // Generate the code
+      const code = this.generateVoucherCode();
+
+      // Create the voucher
+      return prisma.voucherCode.create({
+        data: {
+          code,
+          customerId,
+          specialOfferId: offerId,
+          expirationDate,
+        },
+      });
     });
   }
 
   async redeemVoucher(code: string, email: string) {
-    const voucher = await this.prismaService.voucherCode.findFirst({
-      where: {
-        code,
-        customer: { email },
-        isUsed: false,
-        expirationDate: { gte: new Date() },
-      },
-    });
-    if (!voucher) {
-      throw new BadRequestException('Invalid or expired voucher');
-    }
+    // To guarantee that the voucher is marked as used only after validation and avoid partial updates.
+    return await this.prismaService.$transaction(async (prisma) => {
+      const voucher = await prisma.voucherCode.findFirst({
+        where: {
+          code,
+          customer: { email },
+          isUsed: false,
+          expirationDate: { gte: new Date() },
+        },
+      });
 
-    return this.prismaService.voucherCode.update({
-      where: { id: voucher.id },
-      data: { isUsed: true, dateUsed: new Date() },
+      if (!voucher) {
+        throw new BadRequestException('Invalid or expired voucher');
+      }
+
+      // Update the voucher to mark it as used
+      return prisma.voucherCode.update({
+        where: { id: voucher.id },
+        data: { isUsed: true, dateUsed: new Date() },
+      });
     });
   }
 
@@ -72,17 +83,20 @@ export class VoucherService {
     return nanoid();
   }
   async generateUniqueVoucherCode(): Promise<string> {
-    let code: string;
-    let isUnique = false;
+    // To prevent race conditions when generating unique voucher codes in a multi-user scenario.
+    return await this.prismaService.$transaction(async (prisma) => {
+      let code: string;
+      let isUnique = false;
 
-    while (!isUnique) {
-      code = this.generateVoucherCode();
-      const existingVoucher = await this.prismaService.voucherCode.findUnique({
-        where: { code },
-      });
-      isUnique = !existingVoucher;
-    }
+      while (!isUnique) {
+        code = this.generateVoucherCode();
+        const existingVoucher = await prisma.voucherCode.findUnique({
+          where: { code },
+        });
+        isUnique = !existingVoucher;
+      }
 
-    return code;
+      return code;
+    });
   }
 }
