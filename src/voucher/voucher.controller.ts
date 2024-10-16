@@ -14,6 +14,7 @@ import { RedeemVoucherDto } from './dto/redeem-voucher.dto';
 import { CustomerVoucherDto } from './dto/customer-voucher.dto';
 import { VoucherEntity } from './voucher.entity';
 import { VoucherCode } from '@prisma/client';
+import { SkipThrottle } from '@nestjs/throttler';
 @ApiTags('vouchers')
 @Controller('voucher')
 export class VoucherController {
@@ -22,6 +23,7 @@ export class VoucherController {
   @Post('generate')
   @UsePipes(new ValidationPipe({ transform: true }))
   @ApiOperation({ summary: 'Generate a voucher' })
+  @SkipThrottle() // i feel like this will be used for backoffice or admin users so... no need to throttle
   @ApiResponse({
     status: 201,
     description: 'The voucher has been successfully generated.',
@@ -53,7 +55,7 @@ export class VoucherController {
     const { code, email } = redeemVoucherDto;
     return this.voucherService.redeemVoucher(code, email);
   }
-
+  @SkipThrottle() // same as generateVoucher method
   @Get('customer/:email')
   @ApiOperation({ summary: 'Get vouchers for a customer' })
   @ApiResponse({
