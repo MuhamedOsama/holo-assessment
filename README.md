@@ -265,3 +265,16 @@ COPY --from=build /app/prisma ./prisma
 # Apply Prisma migrations
 CMD ["sh", "-c", "npx prisma migrate deploy && npm run start:prod"]
 ```
+
+## Future Improvements
+
+1. **Authentication and Security**:
+   Implement JWT-based authentication to ensure secure access to the voucher API.
+
+2. **Customizable Voucher Generation**:
+   Introduce support for customizable voucher generation patterns (e.g., alphanumeric, configurable lengths) and batch generation for large-scale campaigns. This would improve flexibility and scalability for marketing initiatives.
+
+3. **Caching and Performance**:
+   Utilize Redis for caching frequently accessed data like customer vouchers to reduce database load and improve response times but also take care of invalidation scenarios.
+
+---
