@@ -1,0 +1,36 @@
+# docker-compose.yml
+version: '3.8'
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - '3000:3000' # Expose the NestJS app on port 3000
+    environment:
+      DATABASE_URL: postgresql://postgres:1111@db:5432/holo-db?schema=public
+    depends_on:
+      - db # Ensure the DB is up before the app starts
+    networks:
+      - voucher-net
+
+  db:
+    image: postgres:13
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 1111
+      POSTGRES_DB: holo-db
+    ports:
+      - '5432:5432'
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    networks:
+      - voucher-net
+
+networks:
+  voucher-net:
+    driver: bridge
+
+volumes:
+  db-data:

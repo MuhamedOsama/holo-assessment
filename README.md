@@ -1,85 +1,267 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+# Voucher Pool Backend Coding Challenge
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+## Overview
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://coveralls.io/github/nestjs/nest?branch=master" target="_blank"><img src="https://coveralls.io/repos/github/nestjs/nest/badge.svg?branch=master#9" alt="Coverage" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+This is a backend service built using [NestJS](https://nestjs.com/) to manage a voucher pool for customers. The service allows generating voucher codes for customers, validating them, and retrieving valid vouchers. The service exposes a REST API and can be set up easily using Docker.
 
-## Description
+### Key Features:
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+- **Generate Voucher Codes**: Automatically generate unique voucher codes for customers based on special offers.
+- **Voucher Validation**: Validate voucher codes by checking if they are assigned to a specific customer and haven't been used or expired.
+- **Voucher Retrieval**: Retrieve all valid vouchers for a specific customer by their email.
+- **Rate Limiting**: Prevent abuse by implementing API rate limiting.
+- **Database Transactions**: Ensure data consistency with the use of transactions.
+- **Unit Tests**: Includes unit tests for core functionalities.
+- **Swagger Documentation** (optional): Auto-generated API documentation with Swagger.
+- **Docker Setup**: Full Docker setup to run the application with all dependencies.
 
-## Project setup
+## Features & Functionalities
+
+### Entities
+
+1. **Customer**:
+
+   - Name
+   - Email (unique)
+
+2. **Special Offer**:
+
+   - Name
+   - Fixed percentage discount
+
+3. **Voucher Code**:
+   - Unique randomly generated code (at least 8 characters)
+   - Assigned to a customer and a special offer
+   - Expiration date
+   - Can only be used once
+   - Tracks the date of usage
+
+### API Functionalities
+
+1. **Generate Voucher Code**:
+
+   - Generate voucher codes for each customer for a given special offer and expiration date.
+
+2. **Validate and Redeem Voucher**:
+
+   - Endpoint to validate a voucher using the voucher code and customer email. If valid, return the discount and mark the voucher as used.
+
+3. **Retrieve All Valid Vouchers**:
+   - Endpoint to retrieve all valid voucher codes for a given email, along with the name of the special offer.
+
+### Plus Features:
+
+- **API Rate Limiting**: Protects the API from abuse by limiting the number of requests per customer.
+- **Swagger Documentation**: Auto-generated Swagger documentation for all API endpoints.
+- **Docker Support**: The entire application can be set up using Docker, including PostgreSQL as the database.
+
+## Installation & Setup
+
+### Prerequisites
+
+- **Node.js** (version 18.x or above)
+- **Docker** (for containerized setup)
+- **PostgreSQL** (if not using Docker)
+
+### Local Development
+
+1. **Clone the Repository**:
+
+   ```bash
+   git clone https://github.com/MuhamedOsama/holo-assesment.git
+   cd voucher-pool
+   ```
+
+2. **Install Dependencies**:
+
+   ```bash
+   npm install
+   ```
+
+3. **Set Up Environment Variables**:
+   Create a `.env` file in the root directory of the project with the following variables:
+
+   ```bash
+   DATABASE_URL=postgresql://postgres:1111@localhost:5432/holo-db?schema=public
+   ```
+
+4. **Run Migrations**:
+
+   ```bash
+   npx prisma migrate dev
+   ```
+
+5. **Start the Application**:
+
+   ```bash
+   npm run start:dev
+   ```
+
+6. **Access the Application**:
+   - The app will be running on `http://localhost:3000`.
+   - Swagger API documentation (if enabled) can be accessed at `http://localhost:3000/api`.
+
+### Running with Docker
+
+1. **Build and Run Containers**:
+   Run the following command to start the entire stack (Node.js app + PostgreSQL) using Docker:
+
+   ```bash
+   docker-compose up --build
+   ```
+
+2. **Access the Application**:
+   - The app will be running on `http://localhost:3000`.
+   - Swagger API documentation (if enabled) can be accessed at `http://localhost:3000/api`.
+
+### Database
+
+The application uses PostgreSQL as the database. By default, the Docker setup runs PostgreSQL on port `5432` with the following credentials:
+
+- **Username**: `postgres`
+- **Password**: `1111`
+- **Database**: `holo-db`
+
+You can change these values in the `docker-compose.yml` file.
+
+### Prisma (ORM)
+
+Prisma is used as the ORM for interacting with the database. You can use Prisma to run migrations, generate the Prisma client, and manage the schema.
+
+#### Running Prisma Migrations
+
+Run the following command to apply migrations:
 
 ```bash
-$ npm install
+npx prisma migrate deploy
 ```
 
-## Compile and run the project
+To generate the Prisma client, run:
 
 ```bash
-# development
-$ npm run start
-
-# watch mode
-$ npm run start:dev
-
-# production mode
-$ npm run start:prod
+npx prisma generate
 ```
 
-## Run tests
+### Unit Tests
+
+To run the unit tests, use the following command:
 
 ```bash
-# unit tests
-$ npm run test
-
-# e2e tests
-$ npm run test:e2e
-
-# test coverage
-$ npm run test:cov
+npm run test
 ```
 
-## Resources
+### API Endpoints
 
-Check out a few resources that may come in handy when working with NestJS:
+- **Endpoint:** `POST /voucher/generate`
+- **Request Body:**
+  ```json
+  {
+    "customerId": "string",
+    "offerId": "string",
+    "expirationDate": "ISO8601 date string"
+  }
+  ```
+- **Response:**
+  ```json
+  {
+    "id": "string",
+    "code": "string",
+    "customerId": "string",
+    "specialOfferId": "string",
+    "expirationDate": "ISO8601 date string",
+    "dateUsed": "ISO8601 date string or null",
+    "isUsed": "boolean",
+    "specialOffer": {
+      "name": "string",
+      "fixedPercentageDiscount": "number"
+    }
+  }
+  ```
 
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
+### Redeem Voucher
 
-## Support
+- **Endpoint:** `POST /voucher/redeem`
+- **Request Body:**
+  ```json
+  {
+    "code": "string",
+    "email": "string"
+  }
+  ```
+- **Response:**
+  ```json
+  {
+    "id": "string",
+    "code": "string",
+    "customerId": "string",
+    "specialOfferId": "string",
+    "expirationDate": "ISO8601 date string",
+    "dateUsed": "ISO8601 date string",
+    "isUsed": "boolean",
+    "specialOffer": {
+      "name": "string",
+      "fixedPercentageDiscount": "number"
+    }
+  }
+  ```
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+### Get Customer Vouchers
 
-## Stay in touch
+- **Endpoint:** `GET /voucher/customer/:email`
+- **Response:**
+  ```json
+  [
+    {
+      "code": "string",
+      "expirationDate": "ISO8601 date string",
+      "isUsed": "boolean",
+      "specialOfferName": "string"
+    }
+  ]
+  ```
 
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+### Swagger Documentation
 
-## License
+The Swagger documentation (if enabled) is available at `http://localhost:3000/api`. It provides detailed information about all available API endpoints, request and response formats, and example usage.
 
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+### Rate Limiting
+
+Rate limiting is implemented to avoid abuse. You can adjust the rate limit in the NestJS configuration file to suit your needs.
+
+## Dockerfile
+
+The Dockerfile is already set up for multi-stage builds to optimize production builds, with Prisma migrations being applied before the app starts.
+
+```dockerfile
+# Use official Node.js image as a build stage
+FROM node:20-alpine AS build
+
+WORKDIR /app
+
+# Install dependencies
+COPY package.json package-lock.json ./
+RUN npm install
+
+# Generate Prisma client
+COPY prisma ./prisma
+RUN npx prisma generate
+
+# Copy the entire project
+COPY . .
+
+# Build the project
+RUN npm run build
+
+# Final stage: production
+FROM node:20-alpine AS production
+
+WORKDIR /app
+
+COPY --from=build /app/dist ./dist
+COPY --from=build /app/node_modules ./node_modules
+COPY --from=build /app/package.json ./
+COPY --from=build /app/prisma ./prisma
+
+# Apply Prisma migrations
+CMD ["sh", "-c", "npx prisma migrate deploy && npm run start:prod"]
+```
